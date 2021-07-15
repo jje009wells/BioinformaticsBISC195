@@ -266,5 +266,80 @@ end
    # Your code here.
 # Don't forget to export your functions!
 
+"""
+   kmercount(sequence, k)
+
+Finds all kmers in a sequence,
+returning a dictionary of those kmers
+and the number of times they appear in the sequence.
+
+Examples
+≡≡≡≡≡≡≡≡≡≡
+
+    julia> kmercount("ggg", 3)
+    Dict{Any,Any} with 1 entry:
+    "GGG" => 1
+
+    julia> kmercount("ATATATATA", 4)
+    Dict{Any,Any} with 2 entries:
+    "TATA" => 3
+    "ATAT" => 3
+
+    julia> kmercount("ATATATATAx", 4)
+    ERROR: Invalid base X encountered
+
+    julia> kmercount("A", 2)
+    ERROR: k must be a positive integer less than the length of the sequence
+"""
+function  kmercount(sequence, k)
+    1 <= k <= length(sequence) || error("k must be a positive integer less than the length of the sequence")
+    kmers = Dict() # initialize dictionary
+    
+    # We're going to loop through the string with numerical index,
+    # each time grabbing the bases at position i through i+k-1.
+    # What is the last index that we should search?    
+    stopindex = length(sequence)-k+1
+
+    for i in 1:stopindex
+        kmer = sequence[i:i+k-1] # Change to index the sequence from i to i+k-1
+        kmer = normalizeDNA(kmer) 
+        if !occursin("N", kmer)
+            if haskey(kmers, kmer)
+            #       add 1 to the value referenced by that kmer
+                kmers[kmer] = kmers[kmer] + 1
+            #   otherwise
+            else
+            #       make a new entry in the dictionary with a value of 1
+                kmers[kmer] = 1
+                #setindex!(kmers, 1, kmer)
+            end
+        end
+        #println(kmers)
+    end
+    return kmers
+end
 
 end # module BioinformaticsBISC195
+
+"""
+    kmerdistance(set1, set2)
+
+Takes two kmer sets and calculates the distance between them, using distance metric that is 1 - (length of intersection / length of union).
+Or alternatively, ((length of set1 - set2) + (length of set2 - set1)) / length of union.
+Note: does not check for validity of kmers
+
+Examples
+========
+
+kmerdistance(["AAA", "AGT"], ["AAA", "GGG"])
+0.666667 (2/3)
+
+kmerdistance(["AAA", "AGT"], ["TTT", "GGG"])
+1
+
+"""
+function kmerdistance(set1, set2)
+    intersectLength = length(intersect(set1, set2))
+    unionLength = length(union(set1, set2))
+    return 1- (intersectLength / unionLength)
+end
