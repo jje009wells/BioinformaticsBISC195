@@ -94,9 +94,11 @@ using Test
     @testset "kmerdistance" begin
         @test kmerdistance(["AAA", "AGT"], ["AAA", "GGG"]) == 2/3
         @test kmerdistance(["AAA", "AGT"], ["TTT", "GGG"]) == 1
-        @test kmerdistance(["AA", "ATT"], ["AGT", "AA", "GTGG"]) == 0.75
+        @test kmerdistance(["AAA", "ATT"], ["AGT", "AAA", "GTGG"]) == 0.75
         @test kmerdistance(["GGT"], ["GGT"]) == 0
     end
+
+    ## tests in progress for kmercomparisons and monthly comparisons
 
 end # strings
 

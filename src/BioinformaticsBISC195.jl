@@ -16,6 +16,10 @@ include("assignment5code.jl")
 include("assignment6code.jl")
 =#
 
+#=include("AlignmentAlgs.jl")
+include("PhylogeneticTree.jl")
+=#
+
 # # uncomment the following line if you intend to use BioSequences types
 # using BioSequences
 
@@ -364,7 +368,7 @@ kmerdistance(["AAA", "AGT"], ["AAA", "GGG"])
 kmerdistance(["AAA", "AGT"], ["TTT", "GGG"])
 1
 
-kmerdistance(["AA", "ATT"], ["AGT", "AA", "GTGG"])
+kmerdistance(["AAA", "ATT"], ["AGT", "AAA", "GTGG"])
 0.75
 
 
@@ -374,5 +378,23 @@ function kmerdistance(set1, set2)
     unionLength = length(union(set1, set2))
     return 1 - (intersectLength / unionLength)
 end
+
+# functions below a work in progress
+
+"""
+    Takes in two different kmer groups and finds and returns a collection of all the kmers sets that are in common for the two
+"""
+# actually dont think this particular funciton is needed, I can possibly just do the calculations right in the notebook?
+#=function kmercomparing(group1, group2)
+    return intersect(group1, group2) 
+end=#
+
+#check that the sequences are organized by date
+#=function monthlycomparison(original, allSeq)
+    score = Vector() # each index of vector will tell how many months have passed in Dec 19, can use this in the graph I think
+    for seq in allSeq
+        if() # check the month here, will have to parse headers
+            push!(score, maximum(swscorematrix(original, seq)))
+end=#
 
 end # module BioinformaticsBISC195
