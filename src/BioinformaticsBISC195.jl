@@ -380,11 +380,11 @@ function kmerdistance(set1, set2)
 end
 
 # functions below a work in progress
-
+# functions newly written, needed for final analysis
 """
     Takes in two different kmer groups and finds and returns a collection of all the kmers sets that are in common for the two
 """
-# actually dont think this particular funciton is needed, I can possibly just do the calculations right in the notebook?
+# actually dont think this particular funciton is needed since intersect actually returns the exact collection, I can possibly just do the calculations right in the notebook?
 #=function kmercomparing(group1, group2)
     return intersect(group1, group2) 
 end=#

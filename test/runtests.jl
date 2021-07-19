@@ -98,7 +98,9 @@ using Test
         @test kmerdistance(["GGT"], ["GGT"]) == 0
     end
 
-    ## tests in progress for kmercomparisons and monthly comparisons
+    ## tests in progress for monthly comparisons
+    @testset "monthlycomparisons" begin
+    end
 
 end # strings
 
