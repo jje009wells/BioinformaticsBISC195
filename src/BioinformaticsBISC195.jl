@@ -6,7 +6,9 @@ export normalizeDNA,
        complement,
        reverse_complement,
        parse_fasta,
-       isDNA
+       isDNA,
+       kmercount,
+       kmerdistance
 #=
 include("assignment3code.jl")
 include("assignment4code.jl")
@@ -26,10 +28,21 @@ Returns a String.
 """
 function normalizeDNA(seq)
     seq = uppercase(string(seq))
+    seq = replace(seq, "Y" => "N")
+    seq = replace(seq, "W" => "N")
+    seq = replace(seq, "K" => "N")
+    seq = replace(seq, "M" => "N")
+    seq = replace(seq, "B" => "N")
+    seq = replace(seq, "D" => "N")
+    seq = replace(seq, "H" => "N")
+    seq = replace(seq, "V" => "N")
+    seq = replace(seq, "R" => "N")
+    seq = replace(seq, "S" => "N")
     for base in seq
         # note: `N` indicates an unknown base
         occursin(base, "AGCTN") || error("invalid base $base")
     end
+
     return seq # change to `return LongDNASeq(seq)` if you want to try to use BioSequences types
 end
 
@@ -80,6 +93,7 @@ end
     Calculates the GC ratio of a DNA sequence.
     The GC ratio is the total number of G and C bases divided by the total length of the sequence.
     For more info about GC content, see here: https://en.wikipedia.org/wiki/GC-content
+    Ambiguous bases (N) not included in calculations.
 
     Ex.
 
@@ -91,19 +105,23 @@ end
 
 """
 function gc_content(seq)
+    seq = normalizeDNA(seq)
     if !isDNA(seq)
         throw(ErrorException("Invalid sequence $seq"))
     end
-    seq = uppercase(seq)
+    seq = normalizeDNA(seq)
 
-    seqlength = length(seq)
+    #seqlength = length(seq)
 
     ## count the number of G's
     gs = count(==('G'), seq)
     ## count the number of C's
     cs = count(==('C'), seq)
 
-    return (gs + cs) / seqlength
+    ts = count(==('T'), seq)
+    as = count(==('A'), seq)
+
+    return (gs + cs) / (gs + cs + ts + as)
 end
 
 """
@@ -234,9 +252,9 @@ function parse_fasta(path)
              push!(seqVect, join(toBeCombined))
              toBeCombined = Vector()
          end
-     elseif !isDNA(line)
+     elseif !isDNA(normalizeDNA(line))
         throw(ErrorException("Invalid base $base"))
-     elseif isDNA(line)
+     elseif isDNA(normalizeDNA(line))
          push!(toBeCombined, line)
 
      end
@@ -250,12 +268,15 @@ end
 """
     isDNA(sequence)
 
+    Ex.
+
 checks the given sequence, and if one of its letters is not a base as stored in the bases array, then returns false.
-otherwise, returns true
+otherwise, returns true. Makes use of normalizeDNA to correct the DNA into a uniform format with accepted bases
 """
 function isDNA(sequence)
+    #sequence = normalizeDNA(sequence)
     bases = ['A', 'C', 'G', 'T', 'N']
-    sequence = uppercase(sequence)
+    #sequence = uppercase(sequence)
     for letter in sequence
         if !(letter ∈ bases)
             return false
@@ -319,8 +340,6 @@ function  kmercount(sequence, k)
     return kmers
 end
 
-end # module BioinformaticsBISC195
-
 """
     kmerdistance(set1, set2)
 
@@ -343,3 +362,5 @@ function kmerdistance(set1, set2)
     unionLength = length(union(set1, set2))
     return 1- (intersectLength / unionLength)
 end
+
+end # module BioinformaticsBISC195
