@@ -364,11 +364,15 @@ kmerdistance(["AAA", "AGT"], ["AAA", "GGG"])
 kmerdistance(["AAA", "AGT"], ["TTT", "GGG"])
 1
 
+kmerdistance(["AA", "ATT"], ["AGT", "AA", "GTGG"])
+0.75
+
+
 """
 function kmerdistance(set1, set2)
     intersectLength = length(intersect(set1, set2))
     unionLength = length(union(set1, set2))
-    return 1- (intersectLength / unionLength)
+    return 1 - (intersectLength / unionLength)
 end
 
 end # module BioinformaticsBISC195
