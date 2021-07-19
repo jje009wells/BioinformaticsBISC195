@@ -268,15 +268,23 @@ end
 """
     isDNA(sequence)
 
-    Ex.
+Examples
+========
 
-checks the given sequence, and if one of its letters is not a base as stored in the bases array, then returns false.
-otherwise, returns true. Makes use of normalizeDNA to correct the DNA into a uniform format with accepted bases
+    isDNA("atGG")
+    true
+
+    isDNA("ATYYG")
+    false
+
+Checks the given sequence, and if one of its letters is not a base as stored in the bases array, then returns false.
+otherwise, returns true.
+NOTE: does not make use of normalizeDNA to correct the DNA into a uniform format with accepted bases; that will need to be done before isDNA is used
 """
 function isDNA(sequence)
     #sequence = normalizeDNA(sequence)
     bases = ['A', 'C', 'G', 'T', 'N']
-    #sequence = uppercase(sequence)
+    sequence = uppercase(sequence)
     for letter in sequence
         if !(letter ∈ bases)
             return false

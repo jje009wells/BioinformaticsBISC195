@@ -35,7 +35,7 @@ using Test
     end # composition
 
     @testset "gc_content" begin
-        @test gc_content("ANTG") == 0.25
+        @test gc_content("ANTG") == 1/3
         @test gc_content("cccggg") * 100 == 100.0
         @test gc_content("ATta") == 0.0
         # @test_throws Exception gc_content("ATty")
@@ -56,7 +56,7 @@ using Test
     end # reverse_complement
 
     @testset "parse_fasta" begin
-        testpath = normpath(joinpath(@__DIR__, "..", "data"))
+        testpath = normpath(joinpath(@__DIR__, "..", "BioinformaticsBISC195/data"))
         genomes = joinpath(testpath, "cov2_genomes.fasta")
         ex1_path = joinpath(testpath, "ex1.fasta")
         ex2_path = joinpath(testpath, "ex2.fasta")
@@ -78,8 +78,9 @@ using Test
 
     #test isDNA, kmercount, kmerdistance
     @testset "isDNA" begin
-        @test isDNA("AcGt")
-        @test isDNA("Ackk") ##the ks will be normalized in N, which is an accepted base here
+        @test isDNA("AcGt") == true
+        @test isDNA("Ackk") == false #returns false bc the normalizeDNA is not used to fix it beforehand
+        @test isDNA(normalizeDNA("Ackk")) == true # returns true because normalizeDNA converts the 'k's into 'N's, which is a valid ambiguous base
         @test isDNA("zzcGt") == false
     end
 
