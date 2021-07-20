@@ -402,8 +402,8 @@ end
 """
     Takes in a collection of collections an returns the intersection of all of said collections
     
-    Example
-    =======
+Example
+=======
     x = [1, 2, 3], y = [1, 65, 32, 2], z = [45, 33, 1, 2]
     w = [x,y,z]
 
@@ -412,8 +412,11 @@ end
 """
 function kmercombining(sets)
 	newint = sets[1]
-	for kmers in sets
+	for kmers in sets[2:end]
 		#@info newint
+        # TODO intersect can take multiple sets, eg
+        # `julia> intersect([Set([1,2]), Set([2,3]), Set([2, 3,4])]...)`
+        # the `...` is "splatting" https://docs.julialang.org/en/v1/manual/faq/#What-does-the-...-operator-do?
 		newint = intersect(newint, kmers)
 	end
 	return newint
@@ -455,13 +458,15 @@ Example
 function fasta_header(header)
  #startswith(header, '>') || error("Invalid header (headers must start with '>')")
 # changed the 2 to a 1 since the parase_fasta cuts the > anyway
- splitVect = split(header[1:end], "|")
- returnTuple = ()
- for component in splitVect
-     returnTuple = (returnTuple..., strip(component))
- end
+# Then you don't need to index at all... `thing[1:end]` is generally === `thing`
+    splitVect = split(header, "|")
+    returnTuple = (strip(component) for component in splitVect) # this is waaay more efficient than repeatedly destructuring and rebuilding the Tuple   
+    # returnTuple = ()
+    # for component in splitVect
+    #     returnTuple = (returnTuple..., strip(component))
+    # end
 
- return returnTuple
+    return returnTuple
 end
 
 end # module BioinformaticsBISC195
