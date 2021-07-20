@@ -19,9 +19,8 @@ include("assignment5code.jl")
 include("assignment6code.jl")
 =#
 
-#=include("AlignmentAlgs.jl")
-include("PhylogeneticTree.jl")
-=#
+include("AlignmentAlgs.jl")
+
 
 # # uncomment the following line if you intend to use BioSequences types
 # using BioSequences
