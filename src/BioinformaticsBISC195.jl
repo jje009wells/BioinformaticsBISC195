@@ -8,7 +8,10 @@ export normalizeDNA,
        parse_fasta,
        isDNA,
        kmercount,
-       kmerdistance
+       kmerdistance,
+       kmercollecting,
+       kmercombining,
+       fasta_header
 #=
 include("assignment3code.jl")
 include("assignment4code.jl")
@@ -382,19 +385,83 @@ end
 # functions below a work in progress
 # functions newly written, needed for final analysis
 """
-    Takes in two different kmer groups and finds and returns a collection of all the kmers sets that are in common for the two
+    Takes in a set of sequences and k, then returns a collection containing all kmers of said length k in the entire set.
+    For example, it can take all sequences that were parsed from a certain file, and it returns all kmers of length k that exist in that file.
+
 """
-# actually dont think this particular funciton is needed since intersect actually returns the exact collection, I can possibly just do the calculations right in the notebook?
-#=function kmercomparing(group1, group2)
-    return intersect(group1, group2) 
-end=#
+function kmercollecting(set, k)
+    kmerdicts = Vector()
+	for seq in set
+		push!(kmerdicts, collect(keys(kmercount(seq, k))))
+	end
+	return kmerdicts	
+end
+
+# there is possibly a smoother way to find the intersection of a dataset like this, where there is a collection that contains other collections,
+# but this coding seemed straightforward
+"""
+    Takes in a collection of collections an returns the intersection of all of said collections
+    
+    Example
+    =======
+    x = [1, 2, 3], y = [1, 65, 32, 2], z = [45, 33, 1, 2]
+    w = [x,y,z]
+
+    kmercombining(w)
+    [1,2]
+"""
+function kmercombining(sets)
+	newint = sets[1]
+	for kmers in sets
+		#@info newint
+		newint = intersect(newint, kmers)
+	end
+	return newint
+end
 
 #check that the sequences are organized by date
+"""
+    monthlycomparison()
+
+    Takes the original sequence that all others will be compared against as well as a collection of all other sequences as input
+"""
 #=function monthlycomparison(original, allSeq)
     score = Vector() # each index of vector will tell how many months have passed in Dec 19, can use this in the graph I think
     for seq in allSeq
         if() # check the month here, will have to parse headers
             push!(score, maximum(swscorematrix(original, seq)))
 end=#
+
+"""
+ fasta_header(header)
+
+Divides a fasta header into its component parts,
+removing any leading or trailing spaces.
+
+Example
+≡≡≡≡≡≡≡≡≡
+ julia> fasta_header(">M0002 |China|Homo sapiens")
+ ("M0002", "China", "Homo sapiens")
+
+ julia> fasta_header("AAATTC")
+ Error: Invalid header (headers must start with '>')
+
+ julia> fasta_header(">Another sequence")
+ ("Another sequence",)
+
+ julia> fasta_header(">headers| can | have| any number | of | info blocks")
+ ("headers", "can", "have", "any number", "of", "info blocks")
+"""
+function fasta_header(header)
+ #startswith(header, '>') || error("Invalid header (headers must start with '>')")
+# changed the 2 to a 1 since the parase_fasta cuts the > anyway
+ splitVect = split(header[1:end], "|")
+ returnTuple = ()
+ for component in splitVect
+     returnTuple = (returnTuple..., strip(component))
+ end
+
+ return returnTuple
+end
 
 end # module BioinformaticsBISC195

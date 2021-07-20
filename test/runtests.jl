@@ -98,7 +98,18 @@ using Test
         @test kmerdistance(["GGT"], ["GGT"]) == 0
     end
 
-    ## tests in progress for monthly comparisons
+    ## tests in progress
+    @testset "kmercombining" begin
+        a = [[1, 2, 3], [1, 65, 32, 2], [45, 33, 1, 2]]
+        @test kmercombining(a) == [1,2]
+
+        b = [[1, 2, 3], [5, 8, 10], [22]]
+        @test kmercombining(b) == []
+
+        c = [[], [1, 2], [1, 2]]
+        @test kmercombining(c) == []
+    end
+
     @testset "monthlycomparisons" begin
     end
 
