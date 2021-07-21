@@ -56,7 +56,7 @@ using Test
     end # reverse_complement
 
     @testset "parse_fasta" begin
-        testpath = normpath(joinpath(@__DIR__, "..", "BioinformaticsBISC195/data"))
+        testpath = normpath(joinpath(@__DIR__, "..", "data"))
         genomes = joinpath(testpath, "cov2_genomes.fasta")
         ex1_path = joinpath(testpath, "ex1.fasta")
         ex2_path = joinpath(testpath, "ex2.fasta")
@@ -92,7 +92,7 @@ using Test
     end
 
     @testset "kmerdistance" begin
-        @test kmerdistance(["AAA", "AGT"], ["AAA", "GGG"]) == 2/3
+        @test kmerdistance(["AAA", "AGT"], ["AAA", "GGG"]) == 1 - 1/3
         @test kmerdistance(["AAA", "AGT"], ["TTT", "GGG"]) == 1
         @test kmerdistance(["AAA", "ATT"], ["AGT", "AAA", "GTGG"]) == 0.75
         @test kmerdistance(["GGT"], ["GGT"]) == 0
