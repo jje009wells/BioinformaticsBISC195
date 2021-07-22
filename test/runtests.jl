@@ -95,11 +95,11 @@ using Test
         @test kmerdistance(["AAA", "AGT"], ["AAA", "GGG"]) == 1 - 1/3
         @test kmerdistance(["AAA", "AGT"], ["TTT", "GGG"]) == 1
         @test kmerdistance(["AAA", "ATT"], ["AGT", "AAA", "GTGG"]) == 0.75
-        @test kmerdistance(["GGT"], ["GGT"]) == 0
+        @test kmerdistance(["GGT", "CAT"], ["CAT", "GGT"]) == 0
     end
 
     ## tests in progress
-    @testset "kmercombining" begin
+    #=@testset "kmercombining" begin
         a = [[1, 2, 3], [1, 65, 32, 2], [45, 33, 1, 2]]
         @test kmercombining(a) == [1,2]
 
@@ -108,6 +108,22 @@ using Test
 
         c = [[], [1, 2], [1, 2]]
         @test kmercombining(c) == []
+    end=#
+
+    @testset "kmercollecting" begin
+        ex1 = parse_fasta(joinpath(@__DIR__, "..", "data", "ex1.fasta"))
+        kc1 = kmercollecting(ex1[2], 3)
+        v1 = ["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"]
+        v2 = ["AGT", "CCC", "CGG", "ATT", "GAT", "GCC", "CAG", "GTC", "CGC", "GGA", "CCA", "TCG"]
+        @test kc1[1] == v1
+        @test kc1[2] == v2
+
+        set2 = ("ACCGGTT", "AAA")
+        kc2 = kmercollecting(set2, 3)
+        v3 = ["ACC", "CCG", "CGG", "GGT", "GTT"]
+        v4 = ["AAA"]
+        @test kc2[1] == v3
+        @test kc2[2] == v4
     end
 
     @testset "monthlycomparisons" begin

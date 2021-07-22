@@ -11,7 +11,14 @@ export normalizeDNA,
        kmerdistance,
        kmercollecting,
        kmercombining,
-       fasta_header
+       fasta_header,
+       nwscore,
+       nwsetupmatrix,
+       nwscorematrix,
+       swsetupmatrix,
+       swscorematrix,
+       nwalign,
+       swalign
 #=
 include("assignment3code.jl")
 include("assignment4code.jl")
@@ -245,9 +252,9 @@ julia> ex2 = parse_fasta("data/ex2.fasta");
 ERROR: invalid base H
 """
 function parse_fasta(path)
- headersVect = Vector()
- seqVect = Vector()
- toBeCombined = Vector()
+ headersVect = Vector{String}()
+ seqVect = Vector{String}()
+ toBeCombined = Vector{String}()
 
  for line in eachline(path)
      #@info "line is " line
@@ -384,8 +391,26 @@ end
 # functions below a work in progress
 # functions newly written, needed for final analysis
 """
-    Takes in a set of sequences and k, then returns a collection containing all kmers of said length k in the entire set.
+    kmercollecting(set, k)
+    
+    Takes in a set of sequences and k, then returns a collection of vectors containing all kmers of said length k in the entire set.
     For example, it can take all sequences that were parsed from a certain file, and it returns all kmers of length k that exist in that file.
+
+    Examples
+    ========
+    ex1 = parse_fasta("C:/Users/Jen/Documents/my_repo/BioinformaticsBISC195/data/ex1.fasta")
+    (Any["ex1.1 | easy", "ex1.2 | multiline"], Any["AATTATAGC", "CGCCCCCCAGTCGGATT"])
+
+    kmercollecting(ex1[2], 3)
+    2-element Vector{Any}:
+    Any["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"]
+    Any["AGT", "CCC", "CGG", "ATT", "GAT", "GCC", "CAG", "GTC", "CGC", "GGA", "CCA", "TCG"]
+
+    set1 = ("ACCGGTT", "AAA")
+    kmercollecting(set1, 3)
+    2-element Vector{Any}
+    Any["ACC", "CCG", "CGG", "GGT", "GTT"]
+    Any["AAA"]
 
 """
 function kmercollecting(set, k)
@@ -409,7 +434,7 @@ Example
     kmercombining(w)
     [1,2]
 """
-function kmercombining(sets)
+#=function kmercombining(sets)
 	newint = sets[1]
 	for kmers in sets[2:end]
 		#@info newint
@@ -419,7 +444,7 @@ function kmercombining(sets)
 		newint = intersect(newint, kmers)
 	end
 	return newint
-end
+end=#
 
 #check that the sequences are organized by date
 """
@@ -427,12 +452,14 @@ end
 
     Takes the original sequence that all others will be compared against as well as a collection of all other sequences as input
 """
-#=function monthlycomparison(original, allSeq)
+function monthlycomparison(original, allSeq)
     score = Vector() # each index of vector will tell how many months have passed in Dec 19, can use this in the graph I think
     for seq in allSeq
-        if() # check the month here, will have to parse headers
+        if() # check the month and year here, will have to parse headers
             push!(score, maximum(swscorematrix(original, seq)))
-end=#
+		end
+	end
+end
 
 """
  fasta_header(header)
