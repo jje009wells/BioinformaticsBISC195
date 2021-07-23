@@ -115,15 +115,16 @@ using Test
     @testset "kmercollecting" begin
         ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
-        v1 = ["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"]
-        v2 = ["AGT", "CCC", "CGG", "ATT", "GAT", "GCC", "CAG", "GTC", "CGC", "GGA", "CCA", "TCG"]
+        # I changed these all to Sets because the order of a set does not matter for comparison
+        v1 = Set(["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"])
+        v2 = Set(["AGT", "CCC", "CGG", "ATT", "GAT", "GCC", "CAG", "GTC", "CGC", "GGA", "CCA", "TCG"])
         @test kc1[1] == v1
         @test kc1[2] == v2
 
         set2 = ("ACCGGTT", "AAA")
         kc2 = kmercollecting(set2, 3)
-        v3 = ["GGT", "ACC", "GTT", "CCG", "CGG"]
-        v4 = ["AAA"]
+        v3 = Set(["GGT", "ACC", "GTT", "CCG", "CGG"])
+        v4 = Set(["AAA"])
         @test kc2[1] == v3
         @test kc2[2] == v4
     end

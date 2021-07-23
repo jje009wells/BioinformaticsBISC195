@@ -412,14 +412,27 @@ end
     Any["AAA"]
 
 """
-function kmercollecting(set, k)
-    kmerdicts = Vector()
+#=function kmercollecting(set, k)
+    kmerdicts = String[]
+    #kmerdicts = Vector()
 	for seq in set
 		push!(kmerdicts, collect(keys(kmercount(seq, k))))
 	end
 	return kmerdicts	
 end
 
+
+function kmercollecting(seqs, n)
+    map(seqs) do seq
+        Set(seq[i:(i+n-1)] for i in 1:(length(seq)-n+1))
+    end
+end=#
+
+function kmercollecting(set, k)
+    map(set) do seq
+        Set(seq[i:(i+k-1)] for i in 1:(length(seq)-k+1))
+    end
+end
 
 #check that the sequences are organized by date
 """
@@ -561,4 +574,5 @@ function fasta_header(header)
    splitVect = split(header, "|")
    return Tuple(map(strip, splitVect))
 end
+
 end # module BioinformaticsBISC195
