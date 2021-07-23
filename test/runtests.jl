@@ -123,7 +123,7 @@ using Test
     end
 
     @testset "shortendates" begin
-        asia = parse_fasta(normpath(joinpath(@__DIR__, "data", "covgen_asiashort.fasta")))
+        asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         @test shortendates(asia[1]) == ["2019-12", "2020-01", "2020-02", "2020-03"]
 
@@ -146,7 +146,7 @@ using Test
         @test monthlycomparison(data2[2][1], data2, 3) == [maximum(swscorematrix(data2[2][1], data2[2][2])), maximum(swscorematrix(data2[2][1], data2[2][4])), maximum(swscorematrix(data2[2][1], data2[2][5]))]
 
         # covgen_asiashort.fasta is a version of the covgen_asia file with only 4 data points listed, from month 2019-21 thru 2020-03
-        asia = parse_fasta(normpath(joinpath(@__DIR__, "data", "covgen_asiashort.fasta")))
+        asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         
         @test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
@@ -154,7 +154,7 @@ using Test
         @test_throws Exception monthlycomparison("Isn't real DNA", asia, 3)
 
         # this file has the same data as covgen_asiashort, but it skips data for Feb 2020, so it should also throw an error
-        asiabad = parse_fasta(normpath(joinpath(@__DIR__, "data", "covgen_asiabad.fasta")))
+        asiabad = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiabad.fasta")))
         #asiabad = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiabad.fasta"))
         @test_throws Exception monthlycomparison(asiabad[2][1], asiabad, 3)
     end
