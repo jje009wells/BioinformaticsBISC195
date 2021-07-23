@@ -56,17 +56,21 @@ using Test
     end # reverse_complement
 
     @testset "parse_fasta" begin
-        testpath = normpath(joinpath(@__DIR__, "..", "data"))
+        testpath = normpath(joinpath(@__DIR__, "..", "BioinformaticsBISC195/data"))
+        #testpath = normpath(joinpath(@__DIR__, "..", "data"))
         genomes = joinpath(testpath, "cov2_genomes.fasta")
         ex1_path = joinpath(testpath, "ex1.fasta")
-        ex2_path = joinpath(testpath, "ex2.fasta")
+        #ex2_path = joinpath(testpath, "ex2.fasta")
 
         ex1 = parse_fasta(ex1_path)
         @test ex1 isa Tuple
-        @test all(x-> x isa String, ex1[1])
-        @test all(x-> x isa String, ex1[2])
+        #@test all(x-> x isa Tuple, ex2[1])
+        #@test all(x-> x isa String, ex2[2])
+        #@test all(x-> x isa Tuple, ex1[1])
+        #@test all(x-> x isa String, ex1[2])
 
-        @test ex1[1] == ["ex1.1 | easy", "ex1.2 | multiline"]
+        @test ex1[1] == [("ex1.1", "easy"), ("ex1.2", "multiline")]
+        #@test ex1[1] == ["ex1.1 | easy", "ex1.2 | multiline"]
         @test ex1[2] == ["AATTATAGC", "CGCCCCCCAGTCGGATT"]
 
         @test_throws Exception parse_fasta(ex2_path)
@@ -75,6 +79,16 @@ using Test
         @test length(cov2[1]) == 8
         @test length(cov2[2]) == 8
     end #parse_fasta
+
+    @testset "fasta_header" begin
+        @test fasta_header("M0002 |China|Homo sapiens") == ("M0002", "China", "Homo sapiens")
+        #@test_throws ErrorException fasta_header("AAATTC")
+        @test fasta_header("Another sequence") == ("Another sequence",)
+        @test fasta_header("headers| can | have| any number | of | info blocks") == ("headers", "can", "have", "any number", "of", "info blocks")
+        #=for line in eachline(joinpath(@__DIR__, "data", "ex1.fasta"))
+            startswith(line, ">") && @test length(fasta_header(line)) == 2
+        end=#        
+    end
 
     #test isDNA, kmercount, kmerdistance
     @testset "isDNA" begin
@@ -98,20 +112,8 @@ using Test
         @test kmerdistance(["GGT", "CAT"], ["CAT", "GGT"]) == 0
     end
 
-    ## tests in progress
-    #=@testset "kmercombining" begin
-        a = [[1, 2, 3], [1, 65, 32, 2], [45, 33, 1, 2]]
-        @test kmercombining(a) == [1,2]
-
-        b = [[1, 2, 3], [5, 8, 10], [22]]
-        @test kmercombining(b) == []
-
-        c = [[], [1, 2], [1, 2]]
-        @test kmercombining(c) == []
-    end=#
-
     @testset "kmercollecting" begin
-        ex1 = parse_fasta(joinpath(@__DIR__, "..", "data", "ex1.fasta"))
+        ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
         v1 = ["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"]
         v2 = ["AGT", "CCC", "CGG", "ATT", "GAT", "GCC", "CAG", "GTC", "CGC", "GGA", "CCA", "TCG"]
@@ -120,13 +122,29 @@ using Test
 
         set2 = ("ACCGGTT", "AAA")
         kc2 = kmercollecting(set2, 3)
-        v3 = ["ACC", "CCG", "CGG", "GGT", "GTT"]
+        v3 = ["GGT", "ACC", "GTT", "CCG", "CGG"]
         v4 = ["AAA"]
         @test kc2[1] == v3
         @test kc2[2] == v4
     end
 
+    @testset "shortendates" begin
+        asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
+        @test shortendates(asia[1]) == ["2019-12", "2020-01", "2020-02", "2020-03"]
+
+        dates1 = ["Should Work | 2031-04", "Should work|2000-12-01| extra", "should not work | 2020", "should work|2001-01"]
+        @test shortendates(dates1) == ["2031-04", "2000-12", "2001-01"]
+
+        dates2 = ["should not work| XX-XX", "should work|XXXX-XX", "should work   |  XXXXXXXextra"] # the function does not check validity of dates, so these should still work
+        @test shortendates(dates2) == ["XXXX-XX", "XXXXXXX"]
+    end
+
     @testset "monthlycomparisons" begin
+        asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
+        
+        @test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
+        @test_throws Exception monthlycomparison(asia[2][1], asia, 4)
+        @test_throws Exception monthlycomparison("Isn't real DNA", asia, 3)
     end
 
 end # strings

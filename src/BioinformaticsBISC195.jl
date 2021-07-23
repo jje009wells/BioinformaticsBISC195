@@ -11,6 +11,8 @@ export normalizeDNA,
        kmerdistance,
        kmercollecting,
        kmercombining,
+       monthlycomparison,
+       shortendates,
        fasta_header,
        nwscore,
        nwsetupmatrix,
@@ -295,7 +297,6 @@ otherwise, returns true.
 NOTE: does not make use of normalizeDNA to correct the DNA into a uniform format with accepted bases; that will need to be done before isDNA is used
 """
 function isDNA(sequence)
-    #sequence = normalizeDNA(sequence)
     bases = ['A', 'C', 'G', 'T', 'N']
     sequence = uppercase(sequence)
     for letter in sequence
@@ -380,7 +381,6 @@ kmerdistance(["AAA", "AGT"], ["TTT", "GGG"])
 kmerdistance(["AAA", "ATT"], ["AGT", "AAA", "GTGG"])
 0.75
 
-
 """
 function kmerdistance(set1, set2)
     intersectLength = length(intersect(set1, set2))
@@ -388,8 +388,7 @@ function kmerdistance(set1, set2)
     return 1 - (intersectLength / unionLength)
 end
 
-# functions below a work in progress
-# functions newly written, needed for final analysis
+
 """
     kmercollecting(set, k)
     
@@ -421,44 +420,104 @@ function kmercollecting(set, k)
 	return kmerdicts	
 end
 
-# there is possibly a smoother way to find the intersection of a dataset like this, where there is a collection that contains other collections,
-# but this coding seemed straightforward
-"""
-    Takes in a collection of collections an returns the intersection of all of said collections
-    
-Example
-=======
-    x = [1, 2, 3], y = [1, 65, 32, 2], z = [45, 33, 1, 2]
-    w = [x,y,z]
-
-    kmercombining(w)
-    [1,2]
-"""
-#=function kmercombining(sets)
-	newint = sets[1]
-	for kmers in sets[2:end]
-		#@info newint
-        # TODO intersect can take multiple sets, eg
-        # `julia> intersect([Set([1,2]), Set([2,3]), Set([2, 3,4])]...)`
-        # the `...` is "splatting" https://docs.julialang.org/en/v1/manual/faq/#What-does-the-...-operator-do?
-		newint = intersect(newint, kmers)
-	end
-	return newint
-end=#
 
 #check that the sequences are organized by date
 """
-    monthlycomparison()
+    monthlycomparison(original, allSeq, totalMonths)
 
-    Takes the original sequence that all others will be compared against as well as a collection of all other sequences as input
+    Takes the string of original sequence that all others will be compared against as well as a collection of all the entire parsed fasta file and the total months to be as input.
+    Note: at the moment only works if the original string of data is from Dec 2019
+    With more time I would modify this to be much more flexible, ie you would be able to put in you own start and end date rather than hard coding the original dates like I did here.
+    Note 1: Also depends on the fact that there is at least one datapoint for each month, which there is in the big file of for all sequences in Asia, but is not necessarily always true
+    Note 2: the swscorematrix format is very time consuming so for my purposes the totalMonths must be fairly low or the length of the sequences very short in order to reduce comparisons
+
+    Examples
+    ========
+    covgen_asiashort.fasta is a version of the covgen_asia file with only 4 data points listed, from month 2019-21 thru 2020-03
+
 """
-function monthlycomparison(original, allSeq)
-    score = Vector() # each index of vector will tell how many months have passed in Dec 19, can use this in the graph I think
-    for seq in allSeq
-        if() # check the month and year here, will have to parse headers
-            push!(score, maximum(swscorematrix(original, seq)))
+function monthlycomparison(original, allSeq, totalMonths)
+	# stores all of dates for each sequences in its own file for easier traversal later
+    if isDNA(normalizeDNA(original)) == false
+        throw(ErrorException("Original sequences is not valid DNA"))
+    end
+    dates = shortendates(allSeq[1]) # I originally tried to put all of the shortendates code inside monthly comparions,
+                                    # but I ended up making them two separate functions for easier testing
+	#=for headers in allSeq[1]
+		#@info headers
+		header = fasta_header(headers)
+		#@info "header" header[2]
+		if length(header[2]) >= 7 #if its shorter than this then it does not have a month listed, so I can't use it and don't need it in the vector
+			push!(dates, header[2][1:7])
+			@info "header short" header[2][1:7]
+		end
+		#@info dates
+	end=#
+	# @info length(dates)
+	# @info length(allSeq[1])
+	
+	# filling out dateIndices to hold ints that represent the indices of the next correct sequences to grab
+    # will be used to grab the correct sequences from allSeq to that will be used to score the differences per month
+	dateIndices = Vector{Int}()
+	# targetMonth and Year are hard coded for the original sequence having a date of Dec 2019
+    targetMonth = 1 
+	targetYear = 2020
+	for i in 1:totalMonths
+		targetString = string(targetYear, "-", lpad(targetMonth,2,"0"))
+		# @info targetString
+		# @info findfirst(targetString .== dates)
+        if findfirst(targetString .== dates) === nothing
+            throw(ErrorException("Date $targetString does not exist in file; cannot make complete graph."))
+        end
+		push!(dateIndices, findfirst(targetString .== dates))
+		if targetMonth == 12
+			targetMonth = 1
+			targetYear = targetYear+1
+		else
+			targetMonth = targetMonth+1
 		end
 	end
+	
+	score = Vector{Int}()
+	for index in dateIndices
+		@info "index" index
+		#@info original
+		#@info allSeq[2][index]
+		#@info "max"  maximum(swscorematrix(original, allSeq[2][index]))
+		push!(score, maximum(swscorematrix(original, allSeq[2][index])))
+	end
+	return score
+end	
+
+"""
+    shortendates(dates)
+
+    Takes in a collection of parsed header lines and returns a collection of just the dates of these headers, in the same order, using only year-month format.
+    Does not save or return any dates that only have a year listed.
+    Designed as a helper function for monthlycomparison
+    Note: strongly depends on the format of the headers in the fasta file, namely that the date is the second item the fasta header and the date is in the order year-month-day.
+
+    Examples
+    ========
+    dates1 = ["Should Work | 2031-04", "Should work|2000-12-01| extra", "should not work | 2020", "should work|2001-01"]
+    shortendates(dates1)
+    3-element Vector{String}:
+    ["2031-04", "2000-12", "2001-01"]
+"""
+function shortendates(parsed_headers)
+    shortDates = Vector{String}()
+	for headers in parsed_headers
+		#@info headers
+		header_components = fasta_header(headers)
+		#@info "header" header[2]
+		if length(header_components[2]) >= 7 #if its shorter than this then it does not have a month listed, so I can't use it and don't need it in the vector
+			push!(shortDates, header_components[2][1:7])
+			#@info "header short" header[2][1:7]
+		end
+		#@info dates
+	end
+
+    return shortDates
 end
 
 """
@@ -466,33 +525,40 @@ end
 
 Divides a fasta header into its component parts,
 removing any leading or trailing spaces.
+NOTE: does not check for or depend on having a '>' to mark as a header
 
 Example
 ≡≡≡≡≡≡≡≡≡
- julia> fasta_header(">M0002 |China|Homo sapiens")
+ julia> fasta_header("M0002 |China|Homo sapiens")
  ("M0002", "China", "Homo sapiens")
 
  julia> fasta_header("AAATTC")
  Error: Invalid header (headers must start with '>')
 
- julia> fasta_header(">Another sequence")
+ julia> fasta_header("Another sequence")
  ("Another sequence",)
 
- julia> fasta_header(">headers| can | have| any number | of | info blocks")
+ julia> fasta_header("headers| can | have| any number | of | info blocks")
  ("headers", "can", "have", "any number", "of", "info blocks")
 """
-function fasta_header(header)
+#= function fasta_header(header)
  #startswith(header, '>') || error("Invalid header (headers must start with '>')")
 # changed the 2 to a 1 since the parase_fasta cuts the > anyway
 # Then you don't need to index at all... `thing[1:end]` is generally === `thing`
     splitVect = split(header, "|")
     returnTuple = (strip(component) for component in splitVect) # this is waaay more efficient than repeatedly destructuring and rebuilding the Tuple   
-    # returnTuple = ()
-    # for component in splitVect
-    #     returnTuple = (returnTuple..., strip(component))
-    # end
+     # returnTuple = ()
+     # for component in splitVect
+     #    returnTuple = (returnTuple..., strip(component))
+     # end
 
     return returnTuple
-end
+end =#
 
+function fasta_header(header)
+   # I ended up not using  returnTuple = (strip(component) for component in splitVect) bc it returned a Base.generator that was hard to deal with,
+   # but I don't think this way constantly creates and destroys a tuple over and over again either
+   splitVect = split(header, "|")
+   return Tuple(map(strip, splitVect))
+end
 end # module BioinformaticsBISC195
