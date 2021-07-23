@@ -38,7 +38,6 @@ using Test
         @test gc_content("ANTG") == 1/3
         @test gc_content("cccggg") * 100 == 100.0
         @test gc_content("ATta") == 0.0
-        # @test_throws Exception gc_content("ATty")
     end # gc_content
 
     @testset "complement" begin
@@ -56,8 +55,8 @@ using Test
     end # reverse_complement
 
     @testset "parse_fasta" begin
-        testpath = normpath(joinpath(@__DIR__, "..", "BioinformaticsBISC195/data"))
-        #testpath = normpath(joinpath(@__DIR__, "..", "data"))
+        #testpath = normpath(joinpath(@__DIR__, "..", "BioinformaticsBISC195/data"))
+        testpath = normpath(joinpath(@__DIR__, "..", "data"))
         genomes = joinpath(testpath, "cov2_genomes.fasta")
         ex1_path = joinpath(testpath, "ex1.fasta")
         ex2_path = joinpath(testpath, "ex2.fasta")
@@ -106,7 +105,7 @@ using Test
     end
 
     @testset "kmercollecting" begin
-        ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
+        ex1 = parse_fasta(joinpath(@__DIR__, "data", "..", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
         # I changed these all to Sets because the order of a set does not matter for comparison
         v1 = Set(["AAT", "ATT", "TAT", "ATA", "TAG", "TTA", "AGC"])
