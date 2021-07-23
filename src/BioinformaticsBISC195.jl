@@ -306,8 +306,7 @@ function isDNA(sequence)
     end
     return true
 end
-   # Your code here.
-# Don't forget to export your functions!
+
 
 """
    kmercount(sequence, k)
@@ -337,10 +336,7 @@ Examples
 function  kmercount(sequence, k)
     1 <= k <= length(sequence) || error("k must be a positive integer less than the length of the sequence")
     kmers = Dict() # initialize dictionary
-    
-    # We're going to loop through the string with numerical index,
-    # each time grabbing the bases at position i through i+k-1.
-    # What is the last index that we should search?    
+      
     stopindex = length(sequence)-k+1
 
     for i in 1:stopindex
@@ -412,22 +408,6 @@ end
     Any["AAA"]
 
 """
-#=function kmercollecting(set, k)
-    kmerdicts = String[]
-    #kmerdicts = Vector()
-	for seq in set
-		push!(kmerdicts, collect(keys(kmercount(seq, k))))
-	end
-	return kmerdicts	
-end
-
-
-function kmercollecting(seqs, n)
-    map(seqs) do seq
-        Set(seq[i:(i+n-1)] for i in 1:(length(seq)-n+1))
-    end
-end=#
-
 function kmercollecting(set, k)
     map(set) do seq
         Set(seq[i:(i+k-1)] for i in 1:(length(seq)-k+1))
@@ -447,6 +427,21 @@ end
     Examples
     ========
     covgen_asiashort.fasta is a version of the covgen_asia file with only 4 data points listed, from month 2019-21 thru 2020-03
+    headers1 = ["Should Work | 2019-12", "Should work|2020-01-01| extra", "should not work | 2020", "should work|2020-02", "should work|2020-03-2"]
+    seq1 = ["ACCTTGGA", "ACCCTGGA", "ACCCTGG", "ACCCTGC", "AACCTGC"] 
+    data1 = [headers1, seq1]
+    
+    monthlycomparison(data1[2][1], data1, 3)
+    3-element Vector{Int64}:
+    6
+    5
+    4
+
+    monthlycomparison(data1[2][1], data1, 5)
+    ERROR: Date 2020-04 does not exist in file; cannot make complete graph.
+
+    monthlycomparison(data1[2][1], data1, 5)
+    ERROR: invalid base I
 
 """
 function monthlycomparison(original, allSeq, totalMonths)
@@ -454,20 +449,8 @@ function monthlycomparison(original, allSeq, totalMonths)
     if isDNA(normalizeDNA(original)) == false
         throw(ErrorException("Original sequences is not valid DNA"))
     end
-    dates = shortendates(allSeq[1]) # I originally tried to put all of the shortendates code inside monthly comparions,
-                                    # but I ended up making them two separate functions for easier testing
-	#=for headers in allSeq[1]
-		#@info headers
-		header = fasta_header(headers)
-		#@info "header" header[2]
-		if length(header[2]) >= 7 #if its shorter than this then it does not have a month listed, so I can't use it and don't need it in the vector
-			push!(dates, header[2][1:7])
-			@info "header short" header[2][1:7]
-		end
-		#@info dates
-	end=#
-	# @info length(dates)
-	# @info length(allSeq[1])
+    dates = shortendates(allSeq[1])
+    # I originally tried to put all of the shortendates code inside monthly comparions, but I ended up making them two separate functions for easier testing
 	
 	# filling out dateIndices to hold ints that represent the indices of the next correct sequences to grab
     # will be used to grab the correct sequences from allSeq to that will be used to score the differences per month
@@ -493,10 +476,6 @@ function monthlycomparison(original, allSeq, totalMonths)
 	
 	score = Vector{Int}()
 	for index in dateIndices
-		@info "index" index
-		#@info original
-		#@info allSeq[2][index]
-		#@info "max"  maximum(swscorematrix(original, allSeq[2][index]))
 		push!(score, maximum(swscorematrix(original, allSeq[2][index])))
 	end
 	return score
@@ -516,18 +495,20 @@ end
     shortendates(dates1)
     3-element Vector{String}:
     ["2031-04", "2000-12", "2001-01"]
+
+    dates2 = ["should not work| XX-XX", "should work|XXXX-XX", "should work   |  XXXXXXXextra"]
+    shortendates(dates2)
+    2-element Vector{String}:
+    "XXXX-XX"
+    "XXXXXXX"
 """
 function shortendates(parsed_headers)
     shortDates = Vector{String}()
 	for headers in parsed_headers
-		#@info headers
 		header_components = fasta_header(headers)
-		#@info "header" header[2]
 		if length(header_components[2]) >= 7 #if its shorter than this then it does not have a month listed, so I can't use it and don't need it in the vector
-			push!(shortDates, header_components[2][1:7])
-			#@info "header short" header[2][1:7]
+			push!(shortDates, header_components[2][1:7]) #1-7 gives only the year and month, which is all that is needed to search for the right sequence
 		end
-		#@info dates
 	end
 
     return shortDates
@@ -554,20 +535,6 @@ Example
  julia> fasta_header("headers| can | have| any number | of | info blocks")
  ("headers", "can", "have", "any number", "of", "info blocks")
 """
-#= function fasta_header(header)
- #startswith(header, '>') || error("Invalid header (headers must start with '>')")
-# changed the 2 to a 1 since the parase_fasta cuts the > anyway
-# Then you don't need to index at all... `thing[1:end]` is generally === `thing`
-    splitVect = split(header, "|")
-    returnTuple = (strip(component) for component in splitVect) # this is waaay more efficient than repeatedly destructuring and rebuilding the Tuple   
-     # returnTuple = ()
-     # for component in splitVect
-     #    returnTuple = (returnTuple..., strip(component))
-     # end
-
-    return returnTuple
-end =#
-
 function fasta_header(header)
    # I ended up not using  returnTuple = (strip(component) for component in splitVect) bc it returned a Base.generator that was hard to deal with,
    # but I don't think this way constantly creates and destroys a tuple over and over again either

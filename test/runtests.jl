@@ -60,17 +60,14 @@ using Test
         #testpath = normpath(joinpath(@__DIR__, "..", "data"))
         genomes = joinpath(testpath, "cov2_genomes.fasta")
         ex1_path = joinpath(testpath, "ex1.fasta")
-        #ex2_path = joinpath(testpath, "ex2.fasta")
+        ex2_path = joinpath(testpath, "ex2.fasta")
 
         ex1 = parse_fasta(ex1_path)
         @test ex1 isa Tuple
-        #@test all(x-> x isa Tuple, ex2[1])
-        #@test all(x-> x isa String, ex2[2])
-        #@test all(x-> x isa Tuple, ex1[1])
-        #@test all(x-> x isa String, ex1[2])
+        @test all(x-> x isa String, ex1[1])
+        @test all(x-> x isa String, ex1[2])
 
-        @test ex1[1] == [("ex1.1", "easy"), ("ex1.2", "multiline")]
-        #@test ex1[1] == ["ex1.1 | easy", "ex1.2 | multiline"]
+        @test ex1[1] == ["ex1.1 | easy", "ex1.2 | multiline"]
         @test ex1[2] == ["AATTATAGC", "CGCCCCCCAGTCGGATT"]
 
         @test_throws Exception parse_fasta(ex2_path)
@@ -82,12 +79,8 @@ using Test
 
     @testset "fasta_header" begin
         @test fasta_header("M0002 |China|Homo sapiens") == ("M0002", "China", "Homo sapiens")
-        #@test_throws ErrorException fasta_header("AAATTC")
         @test fasta_header("Another sequence") == ("Another sequence",)
-        @test fasta_header("headers| can | have| any number | of | info blocks") == ("headers", "can", "have", "any number", "of", "info blocks")
-        #=for line in eachline(joinpath(@__DIR__, "data", "ex1.fasta"))
-            startswith(line, ">") && @test length(fasta_header(line)) == 2
-        end=#        
+        @test fasta_header("headers| can | have| any number | of | info blocks") == ("headers", "can", "have", "any number", "of", "info blocks")       
     end
 
     #test isDNA, kmercount, kmerdistance
@@ -141,11 +134,26 @@ using Test
     end
 
     @testset "monthlycomparisons" begin
+        headers1 = ["Should Work | 2019-12", "Should work|2020-01-01| extra", "should not work | 2020", "should work|2020-02", "should work|2020-03-2"]
+        seq1 = ["ACCTTGGA", "ACCCTGGA", "ACCCTGG", "ACCCTGC", "AACCTGC"] 
+        data1 = [headers1, seq1]
+        @test monthlycomparison(data1[2][1], data1, 3) == [maximum(swscorematrix(data1[2][1], data1[2][2])), maximum(swscorematrix(data1[2][1], data1[2][3])), maximum(swscorematrix(data1[2][1], data1[2][4]))]
+
+        headers2 = ["Should Work | 2019-12", "Should work|2020-01-01| extra", "should skip | 2020-01", "should work|2020-02", "should work|2020-03-2"]
+        seq2 = ["CCATAGG", "CCATTGG", "CCATGG", "CAATGG", "CAATGT"]
+        data2 = [headers2, seq2]
+        @test monthlycomparison(data2[2][1], data2, 3) == [maximum(swscorematrix(data2[2][1], data2[2][2])), maximum(swscorematrix(data2[2][1], data2[2][4])), maximum(swscorematrix(data2[2][1], data2[2][5]))]
+
+        # covgen_asiashort.fasta is a version of the covgen_asia file with only 4 data points listed, from month 2019-21 thru 2020-03
         asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         
         @test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
         @test_throws Exception monthlycomparison(asia[2][1], asia, 4)
         @test_throws Exception monthlycomparison("Isn't real DNA", asia, 3)
+
+        # this file has the same data as covgen_asiashort, but it skips data for Feb 2020, so it should also throw an error
+        asiabad = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiabad.fasta"))
+        @test_throws Exception monthlycomparison(asiabad[2][1], asiabad, 3)
     end
 
 end # strings
