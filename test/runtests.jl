@@ -123,7 +123,7 @@ using Test
         @test kc2[2] == v4
     end
 
-    @testset "shortendates" begin
+    #=@testset "shortendates" begin
         asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         @test shortendates(asia[1]) == ["2019-12", "2020-01", "2020-02", "2020-03"]
@@ -158,7 +158,7 @@ using Test
         asiabad = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiabad.fasta")))
         #asiabad = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiabad.fasta"))
         @test_throws Exception monthlycomparison(asiabad[2][1], asiabad, 3)
-    end
+    end=#
 
 end # strings
 
