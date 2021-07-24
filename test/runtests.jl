@@ -135,7 +135,7 @@ using Test
         @test shortendates(dates2) == ["XXXX-XX", "XXXXXXX"]
     end
 
-    #=@testset "monthlycomparisons" begin
+    @testset "monthlycomparisons" begin
         headers1 = ["Should Work | 2019-12", "Should work|2020-01-01| extra", "should not work | 2020", "should work|2020-02", "should work|2020-03-2"]
         seq1 = ["ACCTTGGA", "ACCCTGGA", "ACCCTGG", "ACCCTGC", "AACCTGC"] 
         data1 = [headers1, seq1]
@@ -158,7 +158,7 @@ using Test
         asiabad = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiabad.fasta")))
         #asiabad = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiabad.fasta"))
         @test_throws Exception monthlycomparison(asiabad[2][1], asiabad, 3)
-    end=#
+    end
 
 end # strings
 
