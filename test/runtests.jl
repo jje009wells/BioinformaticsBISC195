@@ -105,7 +105,7 @@ using Test
     end
 
     @testset "kmercollecting" begin
-        ex1 = parse_fasta(normpath(joinpath(@__DIR__, "..", "data/ex1.fasta")))
+        ex1 = parse_fasta(joinpath(@__DIR__, "../", "COV2analysis", "data/ex1.fasta"))
         #ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
         # I changed these all to Sets because the order of a set does not matter for comparison
