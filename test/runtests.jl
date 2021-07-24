@@ -105,7 +105,7 @@ using Test
     end
 
     @testset "kmercollecting" begin
-        ex1 = parse_fasta(joinpath(@__DIR__, "../", "COV2analysis", "data/ex1.fasta"))
+        ex1 = parse_fasta(normpath(joinpath(@__DIR__, "..", "data/ex1.fasta")))
         #ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
         # I changed these all to Sets because the order of a set does not matter for comparison
@@ -123,7 +123,7 @@ using Test
     end
 
     @testset "shortendates" begin
-        asia = parse_fasta(normpath(joinpath(@__DIR__, "data", "covgen_asiashort.fasta")))
+        asia = parse_fasta(normpath(joinpath(@__DIR__, "../", "COV2analysis" "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         @test shortendates(asia[1]) == ["2019-12", "2020-01", "2020-02", "2020-03"]
 
