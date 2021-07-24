@@ -124,7 +124,7 @@ using Test
     end
 
     @testset "shortendates" begin
-        asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
+        asia = parse_fasta(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta"))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         @test shortendates(asia[1]) == ["2019-12", "2020-01", "2020-02", "2020-03"]
 
