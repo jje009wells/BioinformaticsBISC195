@@ -150,7 +150,7 @@ using Test
         asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         
-        @test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
+        #@test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
         @test_throws Exception monthlycomparison(asia[2][1], asia, 4)
         @test_throws Exception monthlycomparison("Isn't real DNA", asia, 3)
 
