@@ -106,7 +106,6 @@ using Test
 
     @testset "kmercollecting" begin
         ex1 = parse_fasta(normpath(joinpath(@__DIR__, "..", "data/ex1.fasta")))
-        #@info normpath(joinpath(@__DIR__, "..", "data/ex1.fasta"))
         #ex1 = parse_fasta(joinpath(@__DIR__, "data", "ex1.fasta"))
         kc1 = kmercollecting(ex1[2], 3)
         # I changed these all to Sets because the order of a set does not matter for comparison
@@ -150,6 +149,8 @@ using Test
         asia = parse_fasta(normpath(joinpath(@__DIR__, "..", "data", "covgen_asiashort.fasta")))
         #asia = parse_fasta(joinpath(@__DIR__, "data", "covgen_asiashort.fasta"))
         
+        # this line below can be uncommented to run the test, but for some reason it does not work on github (I believe it times out and sends a kill signal)
+        # this line does run on my computer and the test passes, but I am going to leave it uncommented for the push so all the other tests can run
         #@test monthlycomparison(asia[2][1], asia, 3) == [maximum(swscorematrix(asia[2][1], asia[2][2])), maximum(swscorematrix(asia[2][1], asia[2][3])), maximum(swscorematrix(asia[2][1], asia[2][4]))]
         @test_throws Exception monthlycomparison(asia[2][1], asia, 4)
         @test_throws Exception monthlycomparison("Isn't real DNA", asia, 3)
